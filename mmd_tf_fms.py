@@ -17,10 +17,10 @@ def MMD(x, y, kernel):
         kernel: kernel type such as "multiscale" or "rbf"
     """
 
-    tx = reshape(x, (x.shape[0], x.shape[2], x.shape[1], x.shape[3]))
-    ty = reshape(y, (y.shape[0], y.shape[2], y.shape[1], y.shape[3]))
-    print("x.shape", x.shape)
-    print("tx.shape", tx.shape)
+    #tx = reshape(x, (x.shape[0], x.shape[2], x.shape[1], x.shape[3]))
+    #ty = reshape(y, (y.shape[0], y.shape[2], y.shape[1], y.shape[3]))
+    #print("x.shape", x.shape)
+    #print("tx.shape", tx.shape)
     xx, yy, zz = mm(x, tx), mm(y, ty), mm(x, ty)
     rx = broadcast_to(expand_dims(tf.linalg.diag_part(xx), axis=0), xx.shape)
     ry = broadcast_to(expand_dims(tf.linalg.diag_part(yy), axis=0), yy.shape)
