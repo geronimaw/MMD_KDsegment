@@ -284,13 +284,16 @@ def string2dataframe(annot_string):
 
 # Code for the generations of the input and of the labels for the training of the detection network.
 class DataLoader:
-    def __init__(self, opt, doskolka):
+    def __init__(self, opt, doskolka=None, path_colab=None):
         test_data_tab = pd.DataFrame([])
         self.opt = opt
         self.testBatchSize = opt['testBatchSize'] or opt['batchSize'] or 1
+        self.path_colab = path_colab
 
         test_data_file = os.path.join(opt['dataDir'], opt['dataset'])
 
+        if path_colab:
+            test_data_file = os.path.join(path_colab)
         # test_data_file = os.path.join(opt['dataDir'], 'test_joint_head_.xls')
 
         if os.path.exists(test_data_file):
@@ -299,7 +302,7 @@ class DataLoader:
             test_data_tab = test_data_tab.drop(['index'], axis=1)
             test_data_tab = test_data_tab.drop(['Unnamed: 0'], axis=1)
             if doskolka:
-                test_data_tab=test_data_tab.loc[:doskolka]
+                test_data_tab = test_data_tab.loc[:doskolka]
                 test_data_tab = test_data_tab.reset_index()
                 test_data_tab = test_data_tab.drop(['index'], axis=1)
             # print(test_data_tab)
@@ -350,54 +353,49 @@ class DataLoader:
                                     int(np.floor(input_height / model_output_scale)),
                                     jointNum + compoNum], dtype=np.float16)
 
-        print("METHOD: load")
-        path = self.opt['dataDir']
-        # for i in range(0, nSamples):
-        for i in range(0, 10):
-            frame_data = data_tab.loc[indices[i]]
-            frame = cv2.imread(path + frame_data['filename'][7:], 0)
-            frame = cv2.resize(frame, (input_height, input_width))
+        if self.path_colab is not None:
+            print("METHOD: load")
+            path = self.opt['dataDir']
+            for i in range(0, nSamples):
+            # for i in range(0, 10):
+                frame_data = data_tab.loc[indices[i]]
+                frame = cv2.imread(path + frame_data['filename'][7:], 0)
+                frame = cv2.resize(frame, (input_height, input_width))
+    
+                aug_annos = frame_data['annotations']
+    
+                # images
+                aug_frame = frame
+    
+                aug_frame_resized = cv2.resize(aug_frame, (
+                round(input_height / model_output_scale), round(input_width / model_output_scale)))
+    
+                frame_tab = frame_tab.append([pd.Series([aug_frame_resized])], ignore_index=True)
+    
+                # info annotation
+                '''df_anno = string2dataframe(aug_annos)
+                joint_batch_anno = joint_batch_anno.append(df_anno, ignore_index=True)   
+                print("size joint_batch_anno: ", joint_batch_anno.shape)'''
+    
+                # stack all the annotation maps (both joint and connection maps)
+                jointmap = genSepJointMap(aug_annos, jointNames, j_radius, aug_frame, model_output_scale, i,
+                                          path + frame_data['filename'][7:])
+                frame_batch_map[i, :, :, 0:jointNum] = jointmap
+                # print("size frame_batch_map: ", frame_batch_map.shape)
+                #
+                compmap = genSepPAFMapDet_2(aug_annos, compoNames, j_radius, aug_frame, model_output_scale, i,
+                                            path + frame_data['filename'][7:])
+                frame_batch_map[i, :, :, jointNum: jointNum + compoNum] = compmap
+                # print("size frame_batch_map: ", frame_batch_map.shape)
 
-            aug_annos = frame_data['annotations']
-
-            # images
-            aug_frame = frame
-
-            aug_frame_resized = cv2.resize(aug_frame, (
-            round(input_height / model_output_scale), round(input_width / model_output_scale)))
-
-            frame_tab = frame_tab.append([pd.Series([aug_frame_resized])], ignore_index=True)
-
-            # info annotation
-            '''df_anno = string2dataframe(aug_annos)
-            joint_batch_anno = joint_batch_anno.append(df_anno, ignore_index=True)   
-            print("size joint_batch_anno: ", joint_batch_anno.shape)'''
-
-            # stack all the annotation maps (both joint and connection maps)
-            jointmap = genSepJointMap(aug_annos, jointNames, j_radius, aug_frame, model_output_scale, i,
-                                      path + frame_data['filename'][7:])
-            frame_batch_map[i, :, :, 0:jointNum] = jointmap
-            # print("size frame_batch_map: ", frame_batch_map.shape)
-            #
-            compmap = genSepPAFMapDet_2(aug_annos, compoNames, j_radius, aug_frame, model_output_scale, i,
-                                        path + frame_data['filename'][7:])
-            frame_batch_map[i, :, :, jointNum: jointNum + compoNum] = compmap
-            # print("size frame_batch_map: ", frame_batch_map.shape)
-
-        # frame_batch = preProcess(frame_tab, input_width, input_height)
-        frame_batch = preProcess(frame_tab, round(input_width / model_output_scale),
-                                 round(input_height / model_output_scale))
-
-        # preprocessing
-        frame_batch_CPU = frame_batch
-        frame_batch_map_CPU = frame_batch_map
-        # frame_batch_anno_CPU = joint_batch_anno
-
-        # return frame_batch_CPU, frame_batch_map_CPU, frame_batch_anno_CPU
-        return frame_batch_CPU, frame_batch_map_CPU, vector_mean
-
-
-
-from keras.layers import *
-from keras.optimizers import *
-from keras.callbacks import ModelCheckpoint, LearningRateScheduler, TensorBoard
+            # frame_batch = preProcess(frame_tab, input_width, input_height)
+            frame_batch = preProcess(frame_tab, round(input_width / model_output_scale),
+                                     round(input_height / model_output_scale))
+    
+            # preprocessing
+            frame_batch_CPU = frame_batch
+            frame_batch_map_CPU = frame_batch_map
+            # frame_batch_anno_CPU = joint_batch_anno
+    
+            # return frame_batch_CPU, frame_batch_map_CPU, frame_batch_anno_CPU
+            return frame_batch_CPU, frame_batch_map_CPU, vector_mean
