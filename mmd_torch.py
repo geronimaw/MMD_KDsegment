@@ -42,5 +42,4 @@ def MMD(x, y, kernel):
             YY += torch.exp(-0.5 * dyy / a)
             XY += torch.exp(-0.5 * dxy / a)
 
-    # return torch.mean(XX + YY - 2. * XY)
-    return xx
+    return torch.mean(XX + YY - 2. * XY)
