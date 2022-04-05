@@ -21,7 +21,7 @@ def MMD(x, y, kernel):
     #ty = reshape(y, (y.shape[0], y.shape[2], y.shape[1], y.shape[3]))
     #print("x.shape", x.shape)
     #print("tx.shape", tx.shape)
-    xx, yy, zz = mm(x, tx), mm(y, ty), mm(x, ty)
+    xx, yy, zz = mm(x, t(x)), mm(y, t(y)), mm(x, t(y))
     rx = broadcast_to(expand_dims(tf.linalg.diag_part(xx), axis=0), xx.shape)
     ry = broadcast_to(expand_dims(tf.linalg.diag_part(yy), axis=0), yy.shape)
 
