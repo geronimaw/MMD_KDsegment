@@ -364,8 +364,6 @@ class DataLoader:
             frame = cv2.imread(path + frame_data['filename'][7:], 0)
             frame = cv2.resize(frame, (input_height, input_width))
 
-            aug_annos = frame_data['annotations']
-
             # images
             aug_frame = frame
 
@@ -379,6 +377,8 @@ class DataLoader:
             joint_batch_anno = joint_batch_anno.append(df_anno, ignore_index=True)   
             print("size joint_batch_anno: ", joint_batch_anno.shape)'''
             if self.path_colab is None:
+                aug_annos = frame_data['annotations']
+
                 # stack all the annotation maps (both joint and connection maps)
                 jointmap = genSepJointMap(aug_annos, jointNames, j_radius, aug_frame, model_output_scale, i,
                                           path + frame_data['filename'][7:])
