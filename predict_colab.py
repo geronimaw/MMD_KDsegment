@@ -61,7 +61,7 @@ def prediction(get_fm, output, doskolka, path_colab, weightsColab):
     # json_file.close()
     # model = model_from_json(loaded_model_json)
     model = JointDetModelFull()
-    if path_colab is not None:
+    if path_colab is None:
         model.load_weights(op['weightsPath'])
     else:
         model.load_weights(weightsColab)
