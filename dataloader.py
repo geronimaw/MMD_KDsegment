@@ -294,7 +294,6 @@ class DataLoader:
 
         if path_colab:
             test_data_file = path_colab
-            self.opt['dataDir'] = '/content/drive/MyDrive/KD/babypose_test/'
         # test_data_file = os.path.join(opt['dataDir'], 'test_joint_head_.xls')
 
         if os.path.exists(test_data_file):
@@ -356,6 +355,9 @@ class DataLoader:
 
         print("METHOD: load")
         path = self.opt['dataDir']
+        if self.path_colab is not None:
+            path = '/content/drive/MyDrive/KD/babypose_test/'
+
         for i in range(0, nSamples):
         # for i in range(0, 10):
             frame_data = data_tab.loc[indices[i]]
