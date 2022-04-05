@@ -25,6 +25,6 @@ if __name__ == '__main__':
     ac = MMD_tf(a, c, "multiscale")
     aa = MMD_tf(a, a, "multiscale")
 
-    print("MMD_tf(a,b) = ", aa)
+    print("MMD_tf(a,b) = ", ab)
     print("MMD_tf(a,c) = ", ac)
     print("MMD_tf(a,a) = ", aa)
