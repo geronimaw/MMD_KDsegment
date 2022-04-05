@@ -34,7 +34,7 @@ op = {
 }
 
 
-def prediction(get_fm, output, doskolka, path_colab):
+def prediction(get_fm, output, doskolka, path_colab, weightsColab):
     """
 
     :param get_fm: se True, questo codice fornisce solo le (feature) maps in uscita da "output"; se False,
@@ -61,7 +61,10 @@ def prediction(get_fm, output, doskolka, path_colab):
     # json_file.close()
     # model = model_from_json(loaded_model_json)
     model = JointDetModelFull()
-    model.load_weights(op['weightsPath'])
+    if path_colab is not None:
+        model.load_weights(op['weightsPath'])
+    else:
+        model.load_weights(weightsColab)
 
 
     ### Predicting the maps
