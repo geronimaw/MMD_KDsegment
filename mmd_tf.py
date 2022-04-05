@@ -31,7 +31,7 @@ def MMD(x, y, kernel):
     
         bandwidth_range = [0.2, 0.5, 0.9, 1.3]
         for a in bandwidth_range:
-            XX += a ** 2 * (a ** 2 + dxx ** -1)
+            XX += a ** 2 * (a ** 2 + dxx) ** -1
             YY += a ** 2 * (a ** 2 + dyy) ** -1
             XY += a ** 2 * (a ** 2 + dxy) ** -1
 
