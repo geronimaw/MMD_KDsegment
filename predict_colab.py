@@ -33,9 +33,21 @@ op = {
 
 }
 
+
 def prediction(get_fm, output, doskolka, path_colab):
+    """
+    
+    :param get_fm: se True, questo codice fornisce solo le (feature) maps in uscita da "output"; se False, 
+        misura le metriche di predizione
+    :param output: quale output della rete selezionare. 0 per pred senza sigmoide, 1 per pred con sigmoide, 
+            2 per feature maps fine encoder
+    :param doskolka: quanti file prendere per il test. = 0 per prendere tutti i file della cartella
+    :param path_colab: se True, il codice gira su colab e non ha bisogno di calcolare metriche di predizione 
+        o contours etc. si vogliono solo ottenere le feature maps.
+    :return: le mappe in uscita dal layer "output" se get_fm=True
+    """
+
     dataloader = DataLoader(op, doskolka, path_colab)
-    # doskolka = 0 per prendere tutti i file della cartella
     frame_batch_CPU, frame_batch_map_CPU, vector_mean = dataloader.load()
 
     ### Loading the model
@@ -187,4 +199,4 @@ def prediction(get_fm, output, doskolka, path_colab):
               np.nanpercentile(rec_connection, 75, axis=0) - np.nanpercentile(rec_connection, 25, axis=0))
 
     else:
-        return predictions
+        return predictions 
