@@ -33,7 +33,7 @@ op = {
 
 }
 
-def prediction(get_fm):
+def prediction(get_fm, output):
     dataloader = DataLoader(op, doskolka=10)
     frame_batch_CPU, frame_batch_map_CPU, vector_mean = dataloader.load()
 
@@ -49,7 +49,7 @@ def prediction(get_fm):
 
     ### Predicting the maps
     # t = time.time()
-    predictions = model.predict(frame_batch_CPU, verbose=0)[2]
+    predictions = model.predict(frame_batch_CPU, verbose=0)[output]
     # predictions_Sigm = model.predict(frame_batch_CPU, verbose=0)[1]
     # fm_encoder = model.predict(frame_batch_CPU, verbose=0)[2]
     # elapsed = time.time() - t
