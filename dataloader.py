@@ -284,7 +284,7 @@ def string2dataframe(annot_string):
 
 # Code for the generations of the input and of the labels for the training of the detection network.
 class DataLoader:
-    def __init__(self, opt, doskolka=None, path_colab=None):
+    def __init__(self, opt, doskolka, path_colab=None):
         test_data_tab = pd.DataFrame([])
         self.opt = opt
         self.testBatchSize = opt['testBatchSize'] or opt['batchSize'] or 1
@@ -301,7 +301,7 @@ class DataLoader:
             test_data_tab = test_data_tab.reset_index()
             test_data_tab = test_data_tab.drop(['index'], axis=1)
             test_data_tab = test_data_tab.drop(['Unnamed: 0'], axis=1)
-            if doskolka:
+            if doskolka > 0:
                 test_data_tab = test_data_tab.loc[:doskolka]
                 test_data_tab = test_data_tab.reset_index()
                 test_data_tab = test_data_tab.drop(['index'], axis=1)
@@ -353,30 +353,29 @@ class DataLoader:
                                     int(np.floor(input_height / model_output_scale)),
                                     jointNum + compoNum], dtype=np.float16)
 
-        if self.path_colab is not None:
-            print("METHOD: load")
-            path = self.opt['dataDir']
-            for i in range(0, nSamples):
-            # for i in range(0, 10):
-                frame_data = data_tab.loc[indices[i]]
-                frame = cv2.imread(path + frame_data['filename'][7:], 0)
-                frame = cv2.resize(frame, (input_height, input_width))
-    
-                aug_annos = frame_data['annotations']
-    
-                # images
-                aug_frame = frame
-    
-                aug_frame_resized = cv2.resize(aug_frame, (
-                round(input_height / model_output_scale), round(input_width / model_output_scale)))
-    
-                frame_tab = frame_tab.append([pd.Series([aug_frame_resized])], ignore_index=True)
-    
-                # info annotation
-                '''df_anno = string2dataframe(aug_annos)
-                joint_batch_anno = joint_batch_anno.append(df_anno, ignore_index=True)   
-                print("size joint_batch_anno: ", joint_batch_anno.shape)'''
-    
+        print("METHOD: load")
+        path = self.opt['dataDir']
+        for i in range(0, nSamples):
+        # for i in range(0, 10):
+            frame_data = data_tab.loc[indices[i]]
+            frame = cv2.imread(path + frame_data['filename'][7:], 0)
+            frame = cv2.resize(frame, (input_height, input_width))
+
+            aug_annos = frame_data['annotations']
+
+            # images
+            aug_frame = frame
+
+            aug_frame_resized = cv2.resize(aug_frame, (
+            round(input_height / model_output_scale), round(input_width / model_output_scale)))
+
+            frame_tab = frame_tab.append([pd.Series([aug_frame_resized])], ignore_index=True)
+
+            # info annotation
+            '''df_anno = string2dataframe(aug_annos)
+            joint_batch_anno = joint_batch_anno.append(df_anno, ignore_index=True)   
+            print("size joint_batch_anno: ", joint_batch_anno.shape)'''
+            if self.path_colab is None:
                 # stack all the annotation maps (both joint and connection maps)
                 jointmap = genSepJointMap(aug_annos, jointNames, j_radius, aug_frame, model_output_scale, i,
                                           path + frame_data['filename'][7:])
@@ -388,14 +387,18 @@ class DataLoader:
                 frame_batch_map[i, :, :, jointNum: jointNum + compoNum] = compmap
                 # print("size frame_batch_map: ", frame_batch_map.shape)
 
-            # frame_batch = preProcess(frame_tab, input_width, input_height)
-            frame_batch = preProcess(frame_tab, round(input_width / model_output_scale),
-                                     round(input_height / model_output_scale))
-    
-            # preprocessing
-            frame_batch_CPU = frame_batch
+        # frame_batch = preProcess(frame_tab, input_width, input_height)
+        frame_batch = preProcess(frame_tab, round(input_width / model_output_scale),
+                                 round(input_height / model_output_scale))
+
+        frame_batch_CPU = frame_batch
+        
+        if self.path_colab is not None:
+            return frame_batch_CPU, vector_mean
+
+        else:
             frame_batch_map_CPU = frame_batch_map
-            # frame_batch_anno_CPU = joint_batch_anno
-    
-            # return frame_batch_CPU, frame_batch_map_CPU, frame_batch_anno_CPU
             return frame_batch_CPU, frame_batch_map_CPU, vector_mean
+            # frame_batch_anno_CPU = joint_batch_anno
+
+        # return frame_batch_CPU, frame_batch_map_CPU, frame_batch_anno_CPU
