@@ -293,7 +293,8 @@ class DataLoader:
         test_data_file = os.path.join(opt['dataDir'], opt['dataset'])
 
         if path_colab:
-            test_data_file = os.path.join(path_colab)
+            test_data_file = path_colab
+            self.opt['dataDir'] = '/content/drive/MyDrive/KD/babypose_test/'
         # test_data_file = os.path.join(opt['dataDir'], 'test_joint_head_.xls')
 
         if os.path.exists(test_data_file):
@@ -392,7 +393,7 @@ class DataLoader:
                                  round(input_height / model_output_scale))
 
         frame_batch_CPU = frame_batch
-        
+
         if self.path_colab is not None:
             return frame_batch_CPU, vector_mean
 
