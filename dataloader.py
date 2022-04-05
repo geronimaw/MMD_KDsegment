@@ -363,7 +363,6 @@ class DataLoader:
             frame_data = data_tab.loc[indices[i]]
             frame = cv2.imread(path + frame_data['filename'][7:], 0)
             frame = cv2.resize(frame, (input_height, input_width))
-
             # images
             aug_frame = frame
 
